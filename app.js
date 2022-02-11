@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', ()=> {
     const grid= document.querySelector('.grid') 
-    let squares = Array.from(document.querySelectorAll('.grid div'))
+    let square = Array.from(document.querySelectorAll('.grid div'))
     const ScoreDisplay = document.querySelector('#score')
     const StartBtn = document.querySelector("#start-button")
-    const width =10
+    const width = 10
+    let nextRandom = 0
 
 // the Tetrominoes
 const lTetromino = [
@@ -20,9 +21,9 @@ const lBackTetromino = [
 ]
 const tTetromino = [
     [width, width+1, width+2, width*2+1],
-    [1, width, width+1, width*2+2],
+    [1, width, width+1, width*2+1],
     [1, width, width+1, width+2],
-    [1, width+1, width+2, width*2+2]
+    [1, width+1, width+2, width*2+1]
 ]
 const oTetromino = [
     [0, 1, width, width+1],
@@ -61,14 +62,14 @@ let current = theTetrominos[random][0]
 // draw the first rotation for the first tetromino
 function draw() {
     current.forEach(index => {
-        squares[currentPosition + index].classList.add('tetromino')
+        square[currentPosition + index].classList.add('tetromino')
     })
 }
 
 // undraw the tetromino
 function undraw() {
     current.forEach(index => {
-        squares[currentPosition + index].classList.remove('tetromino')
+        square[currentPosition + index].classList.remove('tetromino')
     })
 }
 
@@ -98,13 +99,15 @@ function moveDown () {
 }
 // write a freeze function
 function freeze() {
-    if  (current.some(index => squares[currentPosition + index + width].classList.contains("taken"))) {
-        current.forEach(index => squares[currentPosition + index].classList.add("taken"))
+    if  (current.some(index => square[currentPosition + index + width].classList.contains("taken"))) {
+        current.forEach(index => square[currentPosition + index].classList.add("taken"))
         // Start a new tetromino falling
-        random = Math.floor(Math.random() * theTetrominos.length)
+        random = nextRandom
+        nextRandom = Math.floor(Math.random() * theTetrominos.length)
         current = theTetrominos[random][currentRotation]
         currentPosition = 4
         draw()
+        displayShape()
     }
 }
 // move the tetromino left, unless it is at teh edge or there is a blockage
@@ -114,7 +117,7 @@ function moveLeft() {
 
     if (!isAtLeftEdge) currentPosition -=1
 
-    if (current.some(index => squares[currentPosition + index].classList.contains('taken'))) {
+    if (current.some(index => square[currentPosition + index].classList.contains('taken'))) {
         currentPosition +=1
     }
     draw()
@@ -127,7 +130,7 @@ function moveRight() {
 
     if (!isAtRightEdge) currentPosition +=1
 
-    if (current.some(index => squares[currentPosition + index].classList.contains('taken'))) {
+    if (current.some(index => square[currentPosition + index].classList.contains('taken'))) {
         currentPosition -=1
     }
     draw()
@@ -145,5 +148,31 @@ function rotate() {
     draw()
 }
 
+// show up -next tetromino in mini-grid display
+const displaySquares = document.querySelectorAll('.mini-grid div')
+const displayWidth = 4
+let displayIndex = 0
 
+// the tetromino without rotation
+const upNextTetrominos = [
+    [1, 2, displayWidth+1, displayWidth*2+1],// lTetromino
+    [0, 1, displayWidth+1, displayWidth*2+1],// LBackTetromino
+    [0, 1, displayWidth, displayWidth+1],// oTetromino
+    [displayWidth+1, displayWidth+2, displayWidth*2, displayWidth*2+1],// sTetromino
+    [displayWidth, displayWidth+1, displayWidth+2, displayWidth*2+1],// tTetromino
+    [displayWidth, displayWidth+1, displayWidth*2+1, displayWidth*2+2],//  sBackTetromino[]
+    [1, displayWidth+1, displayWidth*2+1, displayWidth*3+1] // stitkTetromino
+]
+
+// display the shape in the mini-grid display
+function displayShape() {
+    // remove any trace of a tetromino from the entire grid
+    displaySquares.forEach(square => {
+        square.classList.remove('tetromino')
+    })
+    upNextTetrominos[nextRandom].forEach( index => {
+        displaySquares[displayIndex + index].classList.add('tetromino')
+    })
+}
+ 
 })
